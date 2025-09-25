@@ -20,6 +20,7 @@ export function generatePDF(result: any) {
   doc.setFont("helvetica", "normal");
   if (!result.summary || result.summary.length === 0) {
     doc.text("Keine Zusammenfassung vorhanden.", 14, y);
+    y += 6;
   } else {
     result.summary.forEach((line: string) => {
       doc.text(line, 14, y);
@@ -37,11 +38,26 @@ export function generatePDF(result: any) {
   doc.setFont("helvetica", "normal");
   if (!result.issues || result.issues.length === 0) {
     doc.text("Keine Probleme gefunden.", 14, y);
+    y += 6;
   } else {
     result.issues.forEach((issue: string, index: number) => {
+      // Neue Seite falls nötig
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
       doc.text(`${index + 1}. ${issue}`, 14, y);
       y += 6;
     });
+  }
+
+  // Seitenzahlen einfügen
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Seite ${i} / ${pageCount}`, 200 - 30, 290); // rechts unten
   }
 
   return doc.output("blob");

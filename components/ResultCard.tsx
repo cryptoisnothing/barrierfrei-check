@@ -1,61 +1,72 @@
-import ScoreGauge from './ScoreGauge';
-import type { ScanResult } from '../lib/analyzer';
+type ResultProps = {
+  score: number;
+  summary?: string[];
+  issues?: string[];
+};
 
-export default function ResultCard({ result, onExport }: { result: ScanResult; onExport: () => void }) {
+export default function ResultCard({ score, summary = [], issues = [] }: ResultProps) {
+  const bandColor =
+    score < 50 ? "bg-red-500" : score < 75 ? "bg-orange-500" : "bg-green-500";
+
   return (
-    <div className="card mt-6">
-      <div className="flex items-center justify-between">
+    <section
+      aria-labelledby="ergebnis-heading"
+      className="border rounded-xl shadow-md bg-white dark:bg-gray-800 overflow-hidden"
+    >
+      {/* Farbbalken zur schnellen Orientierung */}
+      <div className={`h-2 ${bandColor}`} aria-hidden="true" />
+
+      <div className="p-6 space-y-6">
+        {/* Score */}
+        <header className="text-center">
+          <h2 id="ergebnis-heading" className="text-xl font-semibold">
+            Ergebnis
+          </h2>
+          <p className="text-4xl font-bold text-blue-600 mt-1" aria-live="polite">
+            {score}/100
+          </p>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            {score < 50 ? "Bewertung: Schlecht" : score < 75 ? "Bewertung: Mittel" : "Bewertung: Gut"}
+          </p>
+        </header>
+
+        {/* Zusammenfassung */}
         <div>
-          <div className="badge mb-2">Prüfung am {new Date(result.timestamp).toLocaleString('de-DE')}</div>
-          <h2 className="text-2xl font-bold">Ergebnis für {result.url}</h2>
+          <h3 className="text-lg font-semibold mb-2">Zusammenfassung</h3>
+          {summary.length > 0 ? (
+            <ul role="list" className="space-y-2">
+              {summary.map((line, i) => (
+                <li key={i} className="flex items-start gap-2 text-green-700 dark:text-green-400">
+                  <span aria-hidden="true">✅</span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500">Keine Zusammenfassung vorhanden.</p>
+          )}
         </div>
-        <ScoreGauge score={result.score} />
-      </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-        <div className="card">
-          <h3 className="font-semibold mb-2">Kurz-Zusammenfassung</h3>
-          <ul className="list-disc list-inside space-y-1">
-            {result.summary.length === 0 && <li>Keine offensichtlichen Basis-Probleme erkannt.</li>}
-            {result.summary.map((s, i) => (
-              <li key={i}>{s}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="card">
-          <h3 className="font-semibold mb-2">Statistiken</h3>
-          <ul className="space-y-1">
-            <li>Bilder: {result.stats.images} (ohne Alt: {result.stats.imagesMissingAlt})</li>
-            <li>Links: {result.stats.links} (generisch: {result.stats.genericLinks})</li>
-            <li>H1-Überschriften: {result.stats.headingsH1}</li>
-            <li>Formulare: {result.stats.inputs} (ohne Label: {result.stats.inputsWithoutLabel})</li>
-          </ul>
+        {/* Probleme */}
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Gefundene Probleme</h3>
+          {issues.length > 0 ? (
+            <ul role="list" className="space-y-2">
+              {issues.map((issue, i) => (
+                <li key={i} className="flex items-start gap-2 text-red-600">
+                  <span aria-hidden="true">❌</span>
+                  <span>{issue}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="flex items-center gap-2 text-green-700 dark:text-green-400">
+              <span aria-hidden="true">✅</span>
+              <span>Keine Probleme gefunden</span>
+            </p>
+          )}
         </div>
       </div>
-
-      <div className="mt-4">
-        <h3 className="font-semibold mb-2">Gefundene Probleme</h3>
-        {result.issues.length === 0 ? (
-          <p className="text-sm text-gray-600">Keine Probleme auf Basis der Heuristik gefunden.</p>
-        ) : (
-          <ul className="space-y-2">
-            {result.issues.map((i) => (
-              <li key={i.id} className="p-3 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">{i.title}</div>
-                  <span className="badge uppercase">{i.severity}</span>
-                </div>
-                <div className="text-sm text-gray-700 mt-1">{i.detail}{i.selector ? ` (${i.selector})` : ''}</div>
-                {i.wcag && <div className="text-xs text-gray-500 mt-1">WCAG: {i.wcag}</div>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="mt-6 flex gap-2">
-        <button onClick={onExport} className="btn">PDF-Report herunterladen</button>
-      </div>
-    </div>
+    </section>
   );
 }
