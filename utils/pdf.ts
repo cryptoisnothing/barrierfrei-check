@@ -40,25 +40,26 @@ export function generatePDF(result: any) {
     doc.text("Keine Probleme gefunden.", 14, y);
     y += 6;
   } else {
-    result.issues.forEach((issue: string, index: number) => {
-      // Neue Seite falls nötig
+    result.issues.forEach((issue: any, index: number) => {
       if (y > 280) {
         doc.addPage();
         y = 20;
       }
-      doc.text(`${index + 1}. ${issue}`, 14, y);
+      const text = typeof issue === "string" ? issue : issue.text || JSON.stringify(issue);
+      doc.text(`${index + 1}. ${text}`, 14, y);
       y += 6;
     });
   }
 
-  // Seitenzahlen einfügen
+  // Seitenzahlen
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(`Seite ${i} / ${pageCount}`, 200 - 30, 290); // rechts unten
+    doc.text(`Seite ${i} / ${pageCount}`, 180, 290);
   }
 
-  return doc.output("blob");
+  // Datei direkt speichern
+  doc.save("barrierfrei-check.pdf");
 }

@@ -1,3 +1,9 @@
+function mapSeverity(issue: string) {
+  if (issue.includes("[MAJOR]")) return { icon: "🔴", color: "text-red-600", text: issue.replace("[MAJOR]", "").trim() };
+  if (issue.includes("[MINOR]")) return { icon: "🟠", color: "text-yellow-600", text: issue.replace("[MINOR]", "").trim() };
+  return { icon: "🟢", color: "text-green-600", text: issue.trim() };
+}
+
 type ResultProps = {
   score: number;
   summary?: string[];
@@ -11,9 +17,9 @@ export default function ResultCard({ score, summary = [], issues = [] }: ResultP
   return (
     <section
       aria-labelledby="ergebnis-heading"
-      className="border rounded-xl shadow-md bg-white dark:bg-gray-800 overflow-hidden"
+      className="border rounded-xl shadow-lg bg-white dark:bg-gray-800 overflow-hidden"
     >
-      {/* Farbbalken zur schnellen Orientierung */}
+      {/* Farbbalken */}
       <div className={`h-2 ${bandColor}`} aria-hidden="true" />
 
       <div className="p-6 space-y-6">
@@ -22,10 +28,10 @@ export default function ResultCard({ score, summary = [], issues = [] }: ResultP
           <h2 id="ergebnis-heading" className="text-xl font-semibold">
             Ergebnis
           </h2>
-          <p className="text-4xl font-bold text-blue-600 mt-1" aria-live="polite">
+          <p className="text-4xl font-bold text-blue-600 dark:text-blue-400 mt-1" aria-live="polite">
             {score}/100
           </p>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
+          <p className="text-gray-700 dark:text-gray-300 mt-2">
             {score < 50 ? "Bewertung: Schlecht" : score < 75 ? "Bewertung: Mittel" : "Bewertung: Gut"}
           </p>
         </header>
@@ -52,12 +58,15 @@ export default function ResultCard({ score, summary = [], issues = [] }: ResultP
           <h3 className="text-lg font-semibold mb-2">Gefundene Probleme</h3>
           {issues.length > 0 ? (
             <ul role="list" className="space-y-2">
-              {issues.map((issue, i) => (
-                <li key={i} className="flex items-start gap-2 text-red-600">
-                  <span aria-hidden="true">❌</span>
-                  <span>{issue}</span>
-                </li>
-              ))}
+              {issues.map((issue, i) => {
+                const { icon, color, text } = mapSeverity(issue);
+                return (
+                  <li key={i} className={`flex items-start gap-2 ${color}`}>
+                    <span aria-hidden="true">{icon}</span>
+                    <span>{text}</span>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="flex items-center gap-2 text-green-700 dark:text-green-400">
