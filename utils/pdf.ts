@@ -12,9 +12,9 @@ export function exportPdf(result: ScanResult) {
   doc.text(`Datum: ${new Date(result.timestamp).toLocaleString('de-DE')}`, 14, y); y += 6;
   doc.text(`Score: ${result.score}/100`, 14, y); y += 10;
 
-  doc.setFont(undefined, 'bold');
+  doc.setFont("helvetica", "bold");	 
   doc.text('Zusammenfassung', 14, y); y += 6;
-  doc.setFont(undefined, 'normal');
+  doc.setFont("helvetica", "normal");
   if (!result.summary || result.summary.length === 0) {
     doc.text('- Keine offensichtlichen Basis-Probleme erkannt.', 14, y); y += 6;
   } else {
